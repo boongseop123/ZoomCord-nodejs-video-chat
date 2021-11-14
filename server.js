@@ -9,13 +9,11 @@ const { userJoin, getCurrentUser, userLeave, getRoomUsers } = require('./utils/u
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
 
-// Routing
 app.use(express.static(path.join(__dirname, 'public')));
 
-const botName = 'ZoomCord Bot';
-const ACCEPTED_ROOMS = ["Malaysia", "Indonesia", "Singapore"];
+const botName = '안녕하세요';
+const ACCEPTED_ROOMS = ["1번방", "2번방", "3번방","4번방","5번방"];
 
-// Run when client connets
 io.on('connection', socket => {
     socket.on('joinRoom', ({ userPeerId, username, room }) => {
         if (!ACCEPTED_ROOMS.includes(room)) {
@@ -30,74 +28,55 @@ io.on('connection', socket => {
 
             socket.join(user.room);
         
-            // only show in client to the user connecting
-            socket.emit('message', formatMessage(botName, 'Welcome to ZoomCord!'));
+            socket.emit('message', formatMessage(botName, '면접에 참여하셨습니다'));
 
-            // Broadcast to all except the user itself in a specif room
             socket.broadcast
                 .to(user.room)
                 .emit(
                     'message',
-                    formatMessage(botName, `${user.username} has joined the chat`)
+                    formatMessage(botName, `${user.username} 면접방 참여`)
                 );
 
             socket.broadcast.to(user.room).emit('user-connected', userPeerId)
-
-            // Send users and room info
             io.to(user.room).emit('roomUsers', {
                 room: user.room,
-                users: getRoomUsers(user.room) // E.g return: [{id: '6JhtU8cQGMZzzzj5AAAB', username: 'kaiimran', room: 'Malaysia'}]
+                users: getRoomUsers(user.room) 
             });
-
             socket.on('typing', () => {
                 console.log('typing');
-
                 socket.broadcast
                     .to(user.room)
                     .emit('typing', {
                         username: user.username
                     });
             });
-
             socket.on('stop typing', () => {
-                console.log('stop typing');
-
+                console.log('채팅 종료');
                 socket.broadcast
                     .to(user.room)
                     .emit('stop typing', {
                         username: user.username
                     });
             });
-
-            // Listen for chatMessage
             socket.on('chatMessage', msg => {
                 const user = getCurrentUser(userPeerId);
-
-                // Broadcast to all clients in the room
                 io
                     .to(user.room)
                     .emit('message', formatMessage(user.username, msg));
             });
-
-            // Runs when client disconnects
             socket.on('disconnect', () => {
                 const user = userLeave(userPeerId);
-
                 if (user) {
                     io
                     .to(user.room)
-                    .emit('message', formatMessage(botName, `${user.username} has left the chat`));
+                    .emit('message', formatMessage(botName, `${user.username} 면접방에서 퇴장했습니다`));
                 }
-
-                // Send users and room info
                 io.to(user.room).emit('roomUsers', {
                     room: user.room,
                     users: getRoomUsers(user.room)
                 });
-
                 socket.broadcast.to(user.room).emit('user-disconnected', userPeerId)
             });
         }
     });
-
 });

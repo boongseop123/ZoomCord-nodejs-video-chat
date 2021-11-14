@@ -1,13 +1,13 @@
 {
-  "name": "chatcord",
+  "name": "interview",
   "version": "1.0.0",
-  "description": "Real time chat",
+  "description": "good",
   "main": "server.js",
   "scripts": {
     "start": "node server",
-    "dev": "nodemon server"
+    "devStart": "nodemon server"
   },
-  "author": "Khairul Imran",
+  "author": "boong",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",

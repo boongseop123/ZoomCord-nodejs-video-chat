@@ -11,34 +11,36 @@
 			crossorigin="anonymous"
 		/>
 		<link rel="stylesheet" href="css/style.css" />
-		<title>ZoomCord</title>
+		<title>면접 서비스</title>
 	</head>
 	<body>
 		<div class="join-container">
 			<header class="join-header">
-				<h1><i class="fas fa-video"></i> ZoomCord</h1>
+				<h1><i class="fas fa-video"></i>면접 서비스</h1>
 			</header>
 			<main class="join-main">
 				<form action="chat.html">
 					<div class="form-control">
-						<label for="username">Username</label>
+						<label for="username">이름</label>
 						<input
 							type="text"
 							name="username"
 							id="username"
-							placeholder="Enter username..."
+							placeholder="이름"
 							required
 						/>
 					</div>
 					<div class="form-control">
-						<label for="room">Room</label>
+						<label for="room">방 번호</label>
 						<select name="room" id="room">
-							<option value="Malaysia">Malaysia</option>
-							<option value="Indonesia">Indonesia</option>
-							<option value="Singapore">Singapore</option>
+							<option value="1번방">1번방</option>
+							<option value="2번방">2번방</option>
+							<option value="3번방">3번방</option>
+							<option value="4번방">4번방</option>
+							<option value="5번방">5번방</option>
 						</select>
 					</div>
-					<button type="submit" class="btn">Join Chat</button>
+					<button type="submit" class="btn">면접 참여하기</button>
 				</form>
 			</main>
 		</div>

@@ -9,17 +9,18 @@ const videoGrid = document.getElementById('video-grid')
 const myVideo = document.createElement('video')
 myVideo.muted = true
 
-const myPeer = new Peer(undefined, {
+/*const myPeer = new Peer(undefined, {
     host: 'localhost',
     port: '3001'
-})
+})*/
+
+const myPeer=new Peer();
 const peers = {}
 
 let typing = false;
 let lastTypingTime;
 
-// Get username and room from URL
-// ignoreQueryPrefix ignores the leading question mark. Can also use require('query-string')
+// 사용자 정보랑 면접 방 가져오기
 const { username, room} = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
@@ -27,15 +28,15 @@ const { username, room} = Qs.parse(location.search, {
 // Insert into io('url') if different than window.location / domain
 const socket = io();
 
-// Prevent duplicate username
+//이름 중복 방지
 socket.on('sameName', () => {
-    alert("Username already exist, please choose another username.");
+    alert("이미 있는 사용자 이름입니다.");
     window.history.back();
 });
 
-// Prevent entering invalid room
+//없는 방 못들어가게
 socket.on('roomNotValid', () => {
-    alert("Room does not exist, please only select either Malaysia, Indonesia or Singapore.");
+    alert("없는 방입니다");
     window.history.back();
 });
 
@@ -54,9 +55,7 @@ navigator.mediaDevices.getUserMedia({
     })
 
     socket.on('user-connected', userId => {
-        // connectToNewUser(userId, stream)
         console.log(userId)
-        // make sure myPeer.on('call') has been executed first
         setTimeout(connectToNewUser,1000,userId,stream)
     })
 })
@@ -66,7 +65,6 @@ socket.on('user-disconnected', userId => {
 })
 
 myPeer.on('open', userPeerId => {
-    // On join chatroom
     socket.emit('joinRoom', { userPeerId, username, room });
 })
 
@@ -91,7 +89,6 @@ function addVideoStream(video, stream) {
     videoGrid.append(video)
 }
 
-// Get room and users
 socket.on('roomUsers', ({ room, users }) => {
     outputRoomName(room);
     outputUsers(users);
@@ -101,7 +98,7 @@ inputMessage.addEventListener("input", () => {
     updateTyping();
 });
 
-// Updates the typing event
+//채팅 
 const updateTyping = () => {
     if (!typing) {
         typing = true;
@@ -123,26 +120,22 @@ socket.on('typing', (data) => {
     addChatTyping(data);
 });
 
-// Whenever the server emits 'stop typing', kill the typing message
 socket.on('stop typing', (data) => {
     removeChatTyping(data);
 });
 
-// Adds the visual chat typing message
 const addChatTyping = (data) => {
     data.typing = true;
     data.message = ' is typing..';
     addTypingMessage(data);
 }
 
-// Removes the visual chat typing message
 const removeChatTyping = (data) => {
     const typingElement = document.getElementsByClassName('typing')
 
     while (typingElement.length > 0) typingElement[0].remove();
 }
 
- // Adds the visual chat message to the message list
  const addTypingMessage = (data, options) => {
     const typingClass = data.typing ? 'typing' : '';
     const div = document.createElement('div');
@@ -156,33 +149,26 @@ const removeChatTyping = (data) => {
     document.querySelector('.is-typing').appendChild(div);
 }
 
-// Message from server
 socket.on('message', message => {
     console.log(message);
     outputMessage(message);
 
-    // Scroll bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
 });
 
-// Message submit
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    // Get message text
     const msg = e.target.elements.msg.value;
 
-    // Emit message to server
     socket.emit('chatMessage', msg);
     socket.emit('stop typing');
     typing = false;
 
-    // Clear input
     e.target.elements.msg.value = '';
     e.target.elements.msg.focus();
 });
 
-// Output message to DOM
 function outputMessage(message) {
     const div = document.createElement('div');
     div.classList.add('message');
@@ -206,14 +192,11 @@ function outputMessage(message) {
     document.querySelector('.chat-messages').appendChild(div);
 }
 
-// Add room name to DOM
 function outputRoomName(room) {
     roomName.innerText = room;
 }
 
-// Add users list to DOM
 function outputUsers(users) {
-    // join the array to string. can also user foreach
     userList.innerHTML = `
         ${users.map(user => `<li>${user.username}</li>`).join('')}
     `;
